@@ -5,17 +5,18 @@ import time
 
 
 class Rubbish(object):
-    rubbish_detail = []
-    rubbish_shape = ["rectangle", "circle"]
-    rubbish_colour = ["red", "green", "yellow", "blue", "purple", "pink", "grey", "brown"]
-    rubbish_movement_x = ["5", "-5"]
-    rubbish_movement_y = 3
-    rubbish_position = [[100, 50], [600, 70], [1000, 10]]
+    detail = []
+    shape = ["rectangle", "circle"]
+    colour = ["red", "green", "yellow", "blue", "purple", "pink", "grey", "brown"]
+    movement_x = ["5", "-5"]
+    movement_y = 3
+    position = [[100, 50], [600, 70], [1000, 10]]
     fix_position = 0
-    number_of_rubbish = 0
-    movement_of_rubbish_x = [5, -5, 7, -7, 8, -8, 9, -9]
-    movement_of_rubbish_y = [5, 7, 8, 9]
-    each_rubbish_movement_xy = []
+    number = 0
+    movement_of_x = [5, -5, 7, -7, 8, -8, 9, -9]
+    movement_of_y = [5, 7, 8, 9]
+    each_movement_xy = []
+    speed = 0.1
 
 
 class GameVariable(object):
@@ -69,59 +70,28 @@ class Window1(Rubbish, GameVariable):
         self.master.bind("<Left>", lambda e: self.left())
         self.master.bind("<Right>", lambda e: self.right())
 
-        while Basket.life > 0:
+        # Create the rubbish by default
+        while Rubbish.number < 3:
+            self.num_of_rubbish()
 
-            # Create rubbish
-            while Rubbish.number_of_rubbish < 3:
-
-                # Random choose the shape and colour of rubbish
-                shape = random.choice(Rubbish.rubbish_shape)
-                colour = random.choice(Rubbish.rubbish_colour)
-
-                # Rectangle rubbish
-                if shape == "rectangle":
-                    rectangle = self.canvas.create_rectangle(Rubbish.rubbish_position[Rubbish.fix_position][0],
-                                                             Rubbish.rubbish_position[Rubbish.fix_position][1],
-                                                             Rubbish.rubbish_position[Rubbish.fix_position][0] + 80,
-                                                             Rubbish.rubbish_position[Rubbish.fix_position][1] + 80,
-                                                             fill=colour)
-
-                    # Save the detail to the list
-                    Rubbish.rubbish_detail.append(rectangle)
-
-                # Circle rubbish
-                if shape == "circle":
-                    circle = self.canvas.create_oval(Rubbish.rubbish_position[Rubbish.fix_position][0],
-                                                     Rubbish.rubbish_position[Rubbish.fix_position][1],
-                                                     Rubbish.rubbish_position[Rubbish.fix_position][0] + 80,
-                                                     Rubbish.rubbish_position[Rubbish.fix_position][1] + 80,
-                                                     fill=colour)
-
-                    # Save the detail to the list
-                    Rubbish.rubbish_detail.append(circle)
-
-                # Editing variable
-                Rubbish.number_of_rubbish += 1
-                Rubbish.fix_position += 1
-
-                # Update the screen
-                self.master.update()
+        # start the main game loop
+        while GameVariable.life > 0:
 
             # Movement of rubbish
-            for i in range(Rubbish.number_of_rubbish):
+            for i in range(3):
 
                 # Set the random movement of rubbish
                 for j in range(3):
-                    rubbish_movement_x = random.choice(Rubbish.movement_of_rubbish_x)
-                    rubbish_movement_y = random.choice(Rubbish.movement_of_rubbish_y)
-                    Rubbish.each_rubbish_movement_xy.append([rubbish_movement_x, rubbish_movement_y])
+                    rubbish_movement_x = random.choice(Rubbish.movement_of_x)
+                    rubbish_movement_y = random.choice(Rubbish.movement_of_y)
+                    Rubbish.each_movement_xy.append([rubbish_movement_x, rubbish_movement_y])
 
                 # Check the coordinate of each rubbish
-                self.rubbish_current_position = self.canvas.coords(Rubbish.rubbish_detail[i])
+                self.rubbish_current_position = self.canvas.coords(Rubbish.detail[i])
 
                 # Check if the rubbish touches the wall and code it to bounce back
                 if self.rubbish_current_position[0] < 0 or self.rubbish_current_position[2] > 1366:
-                    Rubbish.each_rubbish_movement_xy[i][0] = -Rubbish.each_rubbish_movement_xy[i][0]
+                    Rubbish.each_movement_xy[i][0] = -Rubbish.each_movement_xy[i][0]
 
                 # Detect and bounce back if the rubbishes collide together
                 for a in range(3):
@@ -134,21 +104,35 @@ class Window1(Rubbish, GameVariable):
                     else:
 
                         # Check the position of another rubbish
-                        self.rubbish2_current_position = self.canvas.coords(Rubbish.rubbish_detail[a])
+                        self.rubbish2_current_position = self.canvas.coords(Rubbish.detail[a])
 
                         if self.rubbish_current_position[0] < self.rubbish2_current_position[2] and \
                                 self.rubbish_current_position[2] > self.rubbish2_current_position[0] and \
                                 self.rubbish_current_position[1] < self.rubbish2_current_position[3] and \
                                 self.rubbish_current_position[3] > self.rubbish2_current_position[1]:
-                            Rubbish.each_rubbish_movement_xy[i][0] = -Rubbish.each_rubbish_movement_xy[i][0]
+                            Rubbish.each_movement_xy[i][0] = -Rubbish.each_movement_xy[i][0]
 
+                # Check the collision between rubbish and ground
+                if self.rubbish_current_position[3] > 700:
+                    GameVariable.life -= 1
+                    self.delete_and_respond_rubbish(i)
 
+                # Check the coordinate of basket
+                position_of_basket = self.canvas.bbox(self.basket)
+                if self.rubbish_current_position[0] < position_of_basket[2] and \
+                        self.rubbish_current_position[2] > position_of_basket[0] and \
+                        self.rubbish_current_position[1] < position_of_basket[3] + 10 and \
+                        self.rubbish_current_position[3] > position_of_basket[1] + 10:
+                    GameVariable.score += 1
+                    self.delete_and_respond_rubbish(i)
 
                 # Move the rubbish if nothing happen
-                self.canvas.move(Rubbish.rubbish_detail[i],
-                                 Rubbish.each_rubbish_movement_xy[i][0],
-                                 Rubbish.each_rubbish_movement_xy[i][1])
-                self.master.update()
+                self.canvas.move(Rubbish.detail[i],
+                                 Rubbish.each_movement_xy[i][0],
+                                 Rubbish.each_movement_xy[i][1])
+
+            time.sleep(Basket.speed)
+            self.master.update()
 
     # Move the basket left
     def left(self):
@@ -170,6 +154,53 @@ class Window1(Rubbish, GameVariable):
         if basket_current_position[0] < 0 or basket_current_position[0] > 1220:
             self.movement_x = -self.movement_x
             self.canvas.move(self.basket, self.movement_x, self.movement_y)
+
+    # Delete and respond rubbish
+    def delete_and_respond_rubbish(self, a):
+        self.canvas.delete(Rubbish.detail[a])
+        Rubbish.detail.pop(a)
+        Rubbish.number -= 1
+        self.num_of_rubbish()
+
+    # Detect the number of rubbish
+    def num_of_rubbish(self):
+
+        # Detect if the fix position is full
+        if Rubbish.fix_position == 3:
+            Rubbish.fix_position = 0
+
+        # Random choose the shape and colour of rubbish
+        shape = random.choice(Rubbish.shape)
+        colour = random.choice(Rubbish.colour)
+
+        # Rectangle rubbish
+        if shape == "rectangle":
+            rectangle = self.canvas.create_rectangle(Rubbish.position[Rubbish.fix_position][0],
+                                                     Rubbish.position[Rubbish.fix_position][1],
+                                                     Rubbish.position[Rubbish.fix_position][0] + 80,
+                                                     Rubbish.position[Rubbish.fix_position][1] + 80,
+                                                     fill=colour)
+
+            # Save the detail to the list
+            Rubbish.detail.append(rectangle)
+
+        # Circle rubbish
+        if shape == "circle":
+            circle = self.canvas.create_oval(Rubbish.position[Rubbish.fix_position][0],
+                                             Rubbish.position[Rubbish.fix_position][1],
+                                             Rubbish.position[Rubbish.fix_position][0] + 80,
+                                             Rubbish.position[Rubbish.fix_position][1] + 80,
+                                             fill=colour)
+
+            # Save the detail to the list
+            Rubbish.detail.append(circle)
+
+        # Editing variable
+        Rubbish.number += 1
+        Rubbish.fix_position += 1
+
+        # Update the window
+        self.master.update()
 
 
 class Basket(Window1):
