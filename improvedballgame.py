@@ -44,29 +44,36 @@ class Window1(Rubbish, GameVariable):
         self.movement_y = 0
 
         # Frame
-        frame = Frame(self.master, width=1366, height=68)
-        frame.pack(fill=BOTH, expand=True)
+        self.canvas2 = Canvas(self.master, width=1366, height=68)
+        self.canvas2.pack(fill=BOTH, expand=True)
+
+        # Score
+        self.score = self.canvas2.create_text(100, 30, text="Score: " + str(GameVariable.score), font=("Times", 30))
+
+        # Life
+        life = Label(self.master, text="Life: " + str(GameVariable.life), font=("Times", 30))
+        self.canvas2.create_window(250, 30, window=life)
 
         # Return menu button
-        return_menu = Button(frame, text="Return", height=2, width=15, command=self.master.destroy)
-        return_menu.grid(column=4, row=0, columnspan=2, sticky="e")
+        return_menu = Button(self.master, text="Return", height=2, width=15, command=self.master.destroy)
+        self.canvas2.create_window(800, 30, window=return_menu)
 
         # Pause game button
-        pause_game = Button(frame, text="Pause", height=2, width=15, command=self.master.destroy)
-        pause_game.grid(column=6, row=0, columnspan=2, sticky="e")
+        pause_game = Button(self.master, text="Pause", height=2, width=15, command=self.master.destroy)
+        self.canvas2.create_window(950, 30, window=pause_game)
 
         # Resume game button
-        resume_game = Button(frame, text="Resume", height=2, width=15, command=self.master.destroy)
-        resume_game.grid(column=8, row=0, columnspan=2, sticky="e")
+        resume_game = Button(self.master, text="Resume", height=2, width=15, command=self.master.destroy)
+        self.canvas2.create_window(1100, 30, window=resume_game)
 
         # Save game button
-        save_game = Button(frame, text="Save and Exit", height=2, width=15, command=self.master.destroy)
-        save_game.grid(column=10, row=0, columnspan=2, sticky="e")
+        save_game = Button(self.master, text="Save and Exit", height=2, width=15, command=self.master.destroy)
+        self.canvas2.create_window(1250, 30, window=save_game)
 
         # Basket
         self.baskGif = PhotoImage(file="basket.gif")
         self.baskGif.image = self.baskGif
-        self.basket = self.canvas.create_image(620, 554, image=self.baskGif, anchor="nw")
+        self.basket = self.canvas.create_image(620, 540, image=self.baskGif, anchor="nw")
         self.master.bind("<Left>", lambda e: self.left())
         self.master.bind("<Right>", lambda e: self.right())
 
@@ -123,6 +130,7 @@ class Window1(Rubbish, GameVariable):
                         self.rubbish_current_position[1] < position_of_basket[3] + 10 and \
                         self.rubbish_current_position[3] > position_of_basket[1] + 10:
                     GameVariable.score += 1
+                    self.canvas2.itemconfig(self.score, text="Score: " + str(GameVariable.score))
                     self.delete_and_respond_rubbish(i)
                     self.delete_and_respond_movement(1, i)
 
@@ -218,11 +226,6 @@ class Window1(Rubbish, GameVariable):
 
         # Update the window
         self.master.update()
-
-
-class Basket(Window1):
-    movement_x = 0
-    movement_y = 0
 
 
 if __name__ == '__main__':
