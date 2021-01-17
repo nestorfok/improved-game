@@ -7,7 +7,8 @@ import time
 class Rubbish(object):
     detail = []
     shape = ["rectangle", "circle"]
-    colour = ["red", "green", "yellow", "blue", "purple", "pink", "grey", "brown"]
+    colour = ["red"]
+    random_colour = []
     movement_x = ["5", "-5"]
     movement_y = 3
     position = [[100, 50], [600, 70], [1000, 10]]
@@ -24,9 +25,58 @@ class GameVariable(object):
     score = 0
     level = 0
     speed = 0.1
-    life = 100000
+    life = 10
     cheat_activate = 0
     save_detail = []
+
+
+class Window2:
+    def __init__(self, master):
+
+        # Initial set up
+        self.master = master
+        self.master.title("Menu")
+        self.master.geometry("1366x768")
+
+        # Canvas set up
+        self.canvas = Canvas(self.master, width=1366, height=768)
+        self.canvas.pack(fill=BOTH, expand=True)
+
+        # All items in the window
+        # Welcome message
+        self.canvas.create_text(680, 50, text="Welcome!!!", font="Times, 50")
+
+        # Start button
+        start = Button(self.master, text="Start", font=("Times", 30), height=2, width=15,
+                       command=self.start)
+        self.canvas.create_window(680, 150, window=start)
+
+        # Score board button
+        score_board = Button(self.master, text="Score Board", font=("Times", 30), height=2, width=15)
+        self.canvas.create_window(680, 250, window=score_board)
+
+        # Load button
+        load = Button(self.master, text="Load", font=("Times", 30), height=2, width=15)
+        self.canvas.create_window(680, 350, window=load)
+
+        # How to play button
+        instruction = Button(self.master, text="Instruction", font=("Times", 30), height=2, width=15)
+        self.canvas.create_window(680, 450, window=instruction)
+
+        # Setting button
+        setting = Button(self.master, text="Setting", font=("Times", 30), height=2, width=15)
+        self.canvas.create_window(680, 550, window=setting)
+
+        # Exit button
+        exit_game = Button(self.master, text="Exit", font=("Times", 30), height=2, width=15,
+                           command=self.master.destroy)
+        self.canvas.create_window(1220, 700, window=exit_game)
+
+    # Define start button
+    def start(self):
+        root.withdraw()
+        start_game = Toplevel(self.master)
+        Window1(start_game)
 
 
 class Window1(Rubbish, GameVariable):
@@ -51,19 +101,18 @@ class Window1(Rubbish, GameVariable):
         self.score = self.canvas2.create_text(100, 30, text="Score: " + str(GameVariable.score), font=("Times", 30))
 
         # Life
-        life = Label(self.master, text="Life: " + str(GameVariable.life), font=("Times", 30))
-        self.canvas2.create_window(250, 30, window=life)
+        self.life = self.canvas2.create_text(250, 30, text="Life: " + str(GameVariable.life), font=("Times", 30))
 
         # Return menu button
         return_menu = Button(self.master, text="Return", height=2, width=15, command=self.master.destroy)
         self.canvas2.create_window(800, 30, window=return_menu)
 
         # Pause game button
-        pause_game = Button(self.master, text="Pause", height=2, width=15, command=self.master.destroy)
+        pause_game = Button(self.master, text="Pause", height=2, width=15, command=self.pause)
         self.canvas2.create_window(950, 30, window=pause_game)
 
         # Resume game button
-        resume_game = Button(self.master, text="Resume", height=2, width=15, command=self.master.destroy)
+        resume_game = Button(self.master, text="Resume", height=2, width=15, command=self.resume)
         self.canvas2.create_window(1100, 30, window=resume_game)
 
         # Save game button
@@ -86,6 +135,12 @@ class Window1(Rubbish, GameVariable):
 
         # start the main game loop
         while GameVariable.life > 0:
+
+            while GameVariable.pause_game == 1:
+                self.master.bind("<Left>", lambda e: self.pause_left())
+                self.master.bind("<Right>", lambda e: self.pause_right())
+                self.master.update()
+                continue
 
             # Movement of rubbish
             for i in range(3):
@@ -118,7 +173,9 @@ class Window1(Rubbish, GameVariable):
 
                 # Check the collision between rubbish and ground
                 if self.rubbish_current_position[3] > 700:
-                    GameVariable.life -= 1
+                    if Rubbish.random_colour[i] != "red":
+                        GameVariable.life -= 1
+                    self.canvas2.itemconfig(self.life, text="Life: " + str(GameVariable.life))
                     self.delete_and_respond_rubbish(i)
 
                 # Check the coordinate of basket
@@ -129,7 +186,13 @@ class Window1(Rubbish, GameVariable):
                         self.rubbish_current_position[2] > position_of_basket[0] and \
                         self.rubbish_current_position[1] < position_of_basket[3] + 10 and \
                         self.rubbish_current_position[3] > position_of_basket[1] + 10:
-                    GameVariable.score += 1
+
+                    if Rubbish.random_colour[i] != "red":
+                        GameVariable.score += 1
+                    else:
+                        GameVariable.score -= 1
+                        GameVariable.life -= 1
+                        self.canvas2.itemconfig(self.life, text="Life: " + str(GameVariable.life))
                     self.canvas2.itemconfig(self.score, text="Score: " + str(GameVariable.score))
                     self.delete_and_respond_rubbish(i)
                     self.delete_and_respond_movement(1, i)
@@ -196,6 +259,9 @@ class Window1(Rubbish, GameVariable):
         shape = random.choice(Rubbish.shape)
         colour = random.choice(Rubbish.colour)
 
+        # Saving the shape and colour to a list
+        Rubbish.random_colour.append(colour)
+
         # Rectangle rubbish
         if shape == "rectangle":
             shape = self.canvas.create_rectangle(Rubbish.position[Rubbish.fix_position][0],
@@ -227,10 +293,27 @@ class Window1(Rubbish, GameVariable):
         # Update the window
         self.master.update()
 
+    # pause the left movement of basket
+    def pause_left(self):
+        pass
+
+    # Pause the right movement of basket
+    def pause_right(self):
+        pass
+
+    @staticmethod
+    # Pause the game
+    def pause():
+        GameVariable.pause_game = 1
+
+    @staticmethod
+    def resume():
+        GameVariable.pause_game = 0
+
 
 if __name__ == '__main__':
     root = Tk()
-    app = Window1(root)
+    app = Window2(root)
     root.mainloop()
 
 
