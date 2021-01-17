@@ -30,7 +30,27 @@ class GameVariable(object):
     save_detail = []
 
 
-class Window2:
+class ScoreBoard(object):
+    score_position_y = 200
+    all_score = []
+    rank = 1
+
+
+class Setting(object):
+    bind_key_list = []
+    left_key = None
+    right_key = None
+    new_name = None
+    correct = 0
+    default_name = "Player"
+    choice = ["a", "b", "c", "d", "e", "f",
+              "g", "h", "i", "j", "k", "l",
+              "m", "n", "o", "p", "q", "r",
+              "s", "t", "u", "v", "w", "z",
+              "y", "z", "Up", "Down", "Right", "Left"]
+
+
+class Window1:
     def __init__(self, master):
 
         # Initial set up
@@ -52,7 +72,8 @@ class Window2:
         self.canvas.create_window(680, 150, window=start)
 
         # Score board button
-        score_board = Button(self.master, text="Score Board", font=("Times", 30), height=2, width=15)
+        score_board = Button(self.master, text="Score Board", font=("Times", 30), height=2, width=15,
+                             command=self.score_board)
         self.canvas.create_window(680, 250, window=score_board)
 
         # Load button
@@ -60,7 +81,8 @@ class Window2:
         self.canvas.create_window(680, 350, window=load)
 
         # How to play button
-        instruction = Button(self.master, text="Instruction", font=("Times", 30), height=2, width=15)
+        instruction = Button(self.master, text="Instruction", font=("Times", 30), height=2, width=15,
+                             command=self.instruction)
         self.canvas.create_window(680, 450, window=instruction)
 
         # Setting button
@@ -69,17 +91,35 @@ class Window2:
 
         # Exit button
         exit_game = Button(self.master, text="Exit", font=("Times", 30), height=2, width=15,
-                           command=self.master.destroy)
+                           command=root.destroy)
         self.canvas.create_window(1220, 700, window=exit_game)
 
     # Define start button
     def start(self):
         root.withdraw()
         start_game = Toplevel(self.master)
-        Window1(start_game)
+        Window2(start_game)
+
+    # Define instruction button
+    def instruction(self):
+        root.withdraw()
+        start_game = Toplevel(self.master)
+        Window5(start_game)
+
+    # Define score board button
+    def score_board(self):
+        root.withdraw()
+        start_game = Toplevel(self.master)
+        Window4(start_game)
+
+    @staticmethod
+    # Show the window again
+    def show_window():
+        root.update()
+        root.deiconify()
 
 
-class Window1(Rubbish, GameVariable):
+class Window2(Rubbish, GameVariable):
     def __init__(self, master):
         self.master = master
         # Setting up background
@@ -311,9 +351,160 @@ class Window1(Rubbish, GameVariable):
         GameVariable.pause_game = 0
 
 
+# Setting page
+class Window3:
+    def __init__(self, master):
+
+        # Basic setting
+        self.master = master
+        self.master.title("Setting")
+        self.master.geometry("1366x768")
+
+        # Canvas set up
+        self.canvas = Canvas(self.master, width=1366, height=700,
+                             bg="powder blue")
+        self.canvas.pack(fill=BOTH, expand=True)
+
+        # Canvas text
+        self.canvas.create_text(680, 40, text="Setting", font=("Times", 60))
+        self.canvas.create_text(300, 100, text="Default setting", font=("Times", 40))
+        self.canvas.create_text(1066, 100, text="Instruction", font=("Times", 40))
+        self.canvas.create_text(300, 150, text="Left: left arrow", font=("Times", 20))
+        self.canvas.create_text(300, 180, text="Right: right arrow", font=("Times", 20))
+        self.canvas.create_text(950, 150, text="Key", font=("Times", 30))
+        self.canvas.create_text(1176, 150, text="How to do", font=("Times", 30))
+        self.canvas.create_text(950, 190, text="A-Z", font=("Times", 20))
+        self.canvas.create_text(1176, 190, text="Type A-Z in lowercase", font=("Times", 20))
+        self.canvas.create_text(950, 250, text="Arrow keys", font=("Times", 20))
+        self.canvas.create_text(1176, 250, text="Type 'Up' for up arrow key", font=("Times", 20))
+        self.canvas.create_text(1176, 275, text="Type 'Down' for down arrow key", font=("Times", 20))
+        self.canvas.create_text(1176, 300, text="Type 'Left' for left arrow key", font=("Times", 20))
+        self.canvas.create_text(1176, 325, text="Type 'Right' for right arrow key", font=("Times", 20))
+
+        # Canvas entry
+        self.canvas.create_text(550, 400, text="Left:", font=("Times", 20))
+        self.entry_left = Entry(self.master)
+        self.canvas.create_window(710, 400, window=self.entry_left)
+        self.canvas.create_text(550, 450, text="Right:", font=("Times", 20))
+        self.entry_right = Entry(self.master)
+        self.canvas.create_window(710, 450, window=self.entry_right)
+
+        # Button
+        enter = Button(self.master, text="Enter", height=2, width=15, font=("Times", 20), bg="powder blue")
+        self.canvas.create_window(550, 500, window=enter)
+        reset = Button(self.master, text="Reset", height=2, width=15, font=("Times", 20), bg="powder blue")
+        self.canvas.create_window(800, 500, window=reset)
+
+    # Define enter button
+    def enter(self):
+
+        # Get the key
+        left_key = self.entry_left.get()
+        Setting.bind_key_list.append(left_key)
+        right_key = self.entry_right.get()
+        Setting.bind_key_list.append(right_key)
+
+        # Check the key
+        for i in Setting.bind_key_list:
+            if i not in Setting.choice:
+                pass
+
+# Score board page
+class Window4(ScoreBoard):
+    def __init__(self, master):
+
+        # Initial setting
+        self.master = master
+        self.master.title("Score Board")
+        self.master.geometry("1366x768")
+
+        # Canvas set up
+        self.canvas = Canvas(self.master, width=1366, height=768)
+        self.canvas.pack(fill=BOTH, expand=True)
+
+        # Canvas text
+        self.canvas.create_text(680, 50, text="Score Board", font=("Times", 50))
+        self.canvas.create_text(400, 150, text="Score", font=("Times", 40))
+        self.canvas.create_text(966, 150, text="Rank", font=("Times", 40))
+
+        # Canvas button
+        return_menu = Button(self.master, text="Exit", font=("Times", 30),
+                             height=2, width=15, command=self.return_menu)
+        self.canvas.create_window(1220, 700, window=return_menu)
+
+        # Extract all the score from the file
+        open_score_file = open("score.txt", "r")
+        for i in open_score_file:
+            for data in i.split():
+                ScoreBoard.all_score.append(int(data))
+        open_score_file.close()
+
+        # Sort the score in descending order
+        ScoreBoard.all_score.sort(reverse=True)
+
+        # Make sure a maximum if 10 scores are displayed
+        if len(ScoreBoard.all_score) > 10:
+            del ScoreBoard.all_score[10:len(ScoreBoard.all_score)]
+
+        # Print the score and rank
+        for i in ScoreBoard.all_score:
+            self.canvas.create_text(400, ScoreBoard.score_position_y, text=str(i), font=("Times", 25))
+            self.canvas.create_text(966, ScoreBoard.score_position_y, text=str(ScoreBoard.rank),
+                                    font=("Times", 25))
+            ScoreBoard.score_position_y += 40
+            ScoreBoard.rank += 1
+
+        # Reset variable
+        ScoreBoard.score_position_y = 200
+        ScoreBoard.rank = 1
+        ScoreBoard.all_score = []
+
+    def return_menu(self):
+        Window1.show_window()
+        self.master.destroy()
+
+
+# Instruction page
+class Window5:
+
+    def __init__(self, master):
+
+        # Initial setting
+        self.master = master
+        self.master.title("Instruction")
+        self.master.geometry("1366x768")
+
+        # Canvas set up
+        self.canvas = Canvas(self.master, width=1366, height=768)
+        self.canvas.pack(fill=BOTH, expand=True)
+
+        # Instruction
+        self.canvas.create_text(680, 50, text="Instruction page", font=("Times", 60))
+
+        self.canvas.create_text(680, 150, text="Use the basket to catch as many rubbishes as possible!",
+                                font=("Times", 30))
+
+        self.canvas.create_text(680, 250, text="Every rubbish you catch will add 1 to your score",
+                                font=("Times", 30))
+
+        self.canvas.create_text(680, 350, text="However, every rubbish that drops to the floor will minus 1 to your "
+                                               "life. You will lose when your life is 0",
+                                font=("Times", 30))
+
+        # Button to return menu
+        return_menu = Button(self.master, text="Exit", font=("Times", 30),
+                             height=2, width=15, command=self.return_menu)
+        self.canvas.create_window(680, 600, window=return_menu)
+
+    # Define return menu button
+    def return_menu(self):
+        Window1.show_window()
+        self.master.destroy()
+
+
 if __name__ == '__main__':
     root = Tk()
-    app = Window2(root)
+    app = Window3(root)
     root.mainloop()
 
 
