@@ -189,7 +189,7 @@ class Window2(Basket, Rubbish, GameVariable, Setting):
         self.life = self.canvas2.create_text(250, 30, text="Life: " + str(GameVariable.life), font=("Times", 30))
 
         # Return menu button
-        return_menu = Button(self.master, text="Return", height=2, width=15, command=self.master.destroy)
+        return_menu = Button(self.master, text="Return", height=2, width=15, command=self.return_menu)
         self.canvas2.create_window(800, 30, window=return_menu)
 
         # Pause game button
@@ -483,6 +483,10 @@ class Window2(Basket, Rubbish, GameVariable, Setting):
     # Pause the right movement of basket
     def pause_right(self):
         pass
+
+    def return_menu(self):
+        Window1.show_window()
+        self.master.destroy()
 
     @staticmethod
     # Pause the game
