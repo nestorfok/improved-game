@@ -294,7 +294,7 @@ class Window2(Basket, Rubbish, GameVariable, Setting):
                                  int(Rubbish.each_movement_xy[i][0]),
                                  int(Rubbish.each_movement_xy[i][1]))
 
-            time.sleep(0.2)
+            time.sleep(0.02)
             self.master.update()
 
         save_score = open("score.txt", "w")
